@@ -7,9 +7,9 @@ w = 640
 h = 480
 screen = pygame.display.set_mode((w, h))
 screen.fill((white))
-running = 1
+running = input("enter a number");
 
-while running:
+while (running != 1):
     screen.fill((white))
     screen.blit(img,(0,0))
     pygame.display.flip()
