@@ -2,6 +2,7 @@ import pygame, sys
 from pygame.locals import *
 import random
 
+img = pygame.image.load('Family.jpg')
 # Number of frames per second
 # Change this value to speed up or slow down your game
 FPS = 100
@@ -11,12 +12,15 @@ WINDOWWIDTH = 400
 WINDOWHEIGHT = 300
 LINETHICKNESS = 10
 PADDLESIZE = 50
-PADDLEOFFSET = 20
-
+PADDLEOFFSET = 10
+score1 = 0
+score2 = 0
 
 # Set up the colours
 BLACK     = (0  ,0  ,0  )
 WHITE     = (255,255,255)
+PINK      = (255,0, 255)
+YELLOW    = (255,255,0)
 
 #Draws the arena the game will be played in. 
 def drawArena():
@@ -35,7 +39,7 @@ def drawPaddle(paddle):
     elif paddle.top < LINETHICKNESS:
         paddle.top = LINETHICKNESS
     #Draws paddle
-    pygame.draw.rect(DISPLAYSURF, WHITE, paddle)
+    pygame.draw.rect(DISPLAYSURF, PINK, paddle)
 
 #draws the ball
 def drawBall(ball):
@@ -69,22 +73,25 @@ def checkCollision(ball, paddle1, paddle2, ballDirX, ballDirY):    #125         
     return ballDirX, ballDirY
 
 #keeps track of the score
-def score(ball, paddle1, paddle2,ballDirX):
-    condition1 = (ballDirX == 1 and ball.right == paddle2.left and paddle2.top < ball.top and paddle2.bottom > ball.bottom)
-    condition2 = (ballDirX == -1 and ball.left == paddle1.right and paddle1.top < ball.top and paddle1.bottom > ball.bottom)
+def score(ball, paddle1, paddle2, ballDirX):
+    global score1, score2 #for inbound local reference error
+    condition1 = (ball.right == paddle2.left and paddle2.top < ball.top and paddle2.bottom > ball.bottom)
+    condition2 = (ball.left == paddle1.right and paddle1.top < ball.top and paddle1.bottom > ball.bottom)
     if condition1:
-        score1 += 1
-            
-    if condition2:
         score2 += 1
         
-        return score1, score2
+    if condition2:
+        score1 += 1
+        
+    return score1, score2
 
 #print the score
-def printScore(score1, score2,DISPLAYSURF):
-    font = pygame.font.SysFont("Comic Sans MS",30)
-    score = font.render(score1 + "                " + score2, 1, (255,255,0))
-    DISPLAYSURF.blit(score, (0,50))
+def printScore(scor1, scor2,DISPLAYSURF):
+    font = pygame.font.SysFont("Times New Roman",30)
+    scr1 = str(scor1)
+    scr2 = str(scor2)
+    score = font.render(scr1 + "                      " + scr2, 1, YELLOW)
+    DISPLAYSURF.blit(score, (90,50))
     
 #end the game
 def end():
@@ -121,6 +128,7 @@ def main():
     #starting score
     score1 = 0
     score2 = 0
+    
     #Draws the starting position of the Arena
     drawArena()
     drawPaddle(paddle1)
@@ -134,16 +142,16 @@ def main():
             #close by mouse
             if event.type == QUIT:
                 end()
-            # arrow key movements player1:up and down player2: w and d
+            # arrow key movements player2:up and down player1: w and d
             elif event.type == KEYDOWN:
                    if event.key == K_UP:
-                        paddle1.y += -50 
-                   elif event.key == K_DOWN:
-                        paddle1.y += 50
-                   elif event.key == K_w:
                         paddle2.y += -50 
-                   elif event.key == K_s:
+                   elif event.key == K_DOWN:
                         paddle2.y += 50
+                   elif event.key == K_w:
+                        paddle1.y += -50 
+                   elif event.key == K_s:
+                        paddle1.y += 50
                 #close by pressing end    
                    elif event.key == K_END:
                         end()
@@ -156,17 +164,9 @@ def main():
         ball = moveBall(ball, ballDirX, ballDirY)
         ballDirX, ballDirY = checkCollision(ball, paddle1, paddle2, ballDirX, ballDirY)
 
-        condition1 = (ball.right == paddle2.left and paddle2.top < ball.top and paddle2.bottom > ball.bottom)
-        condition2 = (ball.left == paddle1.right and paddle1.top < ball.top and paddle1.bottom > ball.bottom)
-        if condition1:
-            score1 += 1
-            print score1
-        if condition2:
-            score2 += 1
+        score1, score2 = score(ball, paddle1, paddle2, ballDirX)
 
-        str1 = str(score1)
-        str2 = str(score2)
-        printScore(str1, str2,DISPLAYSURF)
+        printScore(score1, score2,DISPLAYSURF)
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
