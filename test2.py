@@ -2,7 +2,7 @@ import pygame, sys
 from pygame.locals import *
 import random
 
-img = pygame.image.load('Family.jpg')
+
 # Number of frames per second
 # Change this value to speed up or slow down your game
 FPS = 100
