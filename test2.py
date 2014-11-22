@@ -12,8 +12,7 @@ WINDOWHEIGHT = 300
 LINETHICKNESS = 10
 PADDLESIZE = 50
 PADDLEOFFSET = 20
-score1 = 0
-score2 = 0
+
 
 # Set up the colours
 BLACK     = (0  ,0  ,0  )
@@ -75,16 +74,16 @@ def score(ball, paddle1, paddle2,ballDirX):
     condition2 = (ballDirX == -1 and ball.left == paddle1.right and paddle1.top < ball.top and paddle1.bottom > ball.bottom)
     if condition1:
         score1 += 1
-        return score1
-    
+            
     if condition2:
         score2 += 1
-        return score2
+        
+        return score1, score2
 
 #print the score
 def printScore(score1, score2,DISPLAYSURF):
     font = pygame.font.SysFont("Comic Sans MS",30)
-    score = font.render(score1 + " " + score2, 1, (255,255,0))
+    score = font.render(score1 + "                " + score2, 1, (255,255,0))
     DISPLAYSURF.blit(score, (0,50))
     
 #end the game
@@ -119,6 +118,9 @@ def main():
     paddle2 = pygame.Rect(WINDOWWIDTH - PADDLEOFFSET - LINETHICKNESS, playerTwoPosition, LINETHICKNESS,PADDLESIZE)
     ball = pygame.Rect(ballX, ballY, LINETHICKNESS, LINETHICKNESS)
 
+    #starting score
+    score1 = 0
+    score2 = 0
     #Draws the starting position of the Arena
     drawArena()
     drawPaddle(paddle1)
@@ -150,14 +152,21 @@ def main():
         drawPaddle(paddle1)
         drawPaddle(paddle2)
         drawBall(ball)
-        #print paddle1.top
-        #print ball.top
+        
         ball = moveBall(ball, ballDirX, ballDirY)
         ballDirX, ballDirY = checkCollision(ball, paddle1, paddle2, ballDirX, ballDirY)
-        #score1, score2 = score(ball, paddle1, paddle2,ballDirX)
-        score1 = str(10)
-        score2 = str(20)
-        printScore(score1, score2,DISPLAYSURF)
+
+        condition1 = (ball.right == paddle2.left and paddle2.top < ball.top and paddle2.bottom > ball.bottom)
+        condition2 = (ball.left == paddle1.right and paddle1.top < ball.top and paddle1.bottom > ball.bottom)
+        if condition1:
+            score1 += 1
+            print score1
+        if condition2:
+            score2 += 1
+
+        str1 = str(score1)
+        str2 = str(score2)
+        printScore(str1, str2,DISPLAYSURF)
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
