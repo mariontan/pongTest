@@ -1,9 +1,10 @@
 import pygame, sys
 from pygame.locals import *
+import random
 
 # Number of frames per second
 # Change this value to speed up or slow down your game
-FPS = 1
+FPS = 100
 
 #Global Variables to be used through our program
 WINDOWWIDTH = 400
@@ -41,7 +42,15 @@ def drawPaddle(paddle):
 def drawBall(ball):
     pygame.draw.rect(DISPLAYSURF, WHITE, ball)
     
-
+#Random start direction, ensures that each time the game starts
+#ball may go in either direction
+def start():
+    number = random.randint(1,10)
+    if number >= 5:
+        return 1
+    if number < 5:
+        return -1
+    
 #moves the ball returns new position
 def moveBall(ball, ballDirX, ballDirY):
     ball.x += ballDirX
@@ -50,7 +59,7 @@ def moveBall(ball, ballDirX, ballDirY):
 
 #Checks for a collision with a wall or paddle, and 'bounces' ball off them.
 #direction reverses
-def checkCollision(ball, paddle1, paddle2, ballDirX, ballDirY):
+def checkCollision(ball, paddle1, paddle2, ballDirX, ballDirY):    #125          90  paddle2.top < ball.top is with respect to the screen When ball goes up  ball.top decreses
     condition1 = (ballDirX == 1 and ball.right == paddle2.left and paddle2.top < ball.top and paddle2.bottom > ball.bottom)
     condition2 = (ballDirX == -1 and ball.left == paddle1.right and paddle1.top < ball.top and paddle1.bottom > ball.bottom)
     
@@ -61,15 +70,23 @@ def checkCollision(ball, paddle1, paddle2, ballDirX, ballDirY):
     return ballDirX, ballDirY
 
 #keeps track of the score
-def score(ball, paddle1, paddle2):
-    if ball.right == paddle2.left:
+def score(ball, paddle1, paddle2,ballDirX):
+    condition1 = (ballDirX == 1 and ball.right == paddle2.left and paddle2.top < ball.top and paddle2.bottom > ball.bottom)
+    condition2 = (ballDirX == -1 and ball.left == paddle1.right and paddle1.top < ball.top and paddle1.bottom > ball.bottom)
+    if condition1:
         score1 += 1
         return score1
     
-    if ball.left == paddle1.right:
+    if condition2:
         score2 += 1
         return score2
 
+#print the score
+def printScore(score1, score2,DISPLAYSURF):
+    font = pygame.font.SysFont("Comic Sans MS",30)
+    score = font.render(score1 + " " + score2, 1, (255,255,0))
+    DISPLAYSURF.blit(score, (0,50))
+    
 #end the game
 def end():
     pygame.quit()
@@ -93,9 +110,9 @@ def main():
     playerOnePosition = (WINDOWHEIGHT - PADDLESIZE) /2
     playerTwoPosition = (WINDOWHEIGHT - PADDLESIZE) /2
 
-    #Keeps track of ball direction
-    ballDirX = -1 ## -1 = left 1 = right
-    ballDirY = -1 ## -1 = up 1 = down
+    #tells the ball where to start moving
+    ballDirX = start() 
+    ballDirY = start() 
 
     #Creates Rectangles for ball and paddles.
     paddle1 = pygame.Rect(PADDLEOFFSET,playerOnePosition, LINETHICKNESS,PADDLESIZE)
@@ -133,10 +150,14 @@ def main():
         drawPaddle(paddle1)
         drawPaddle(paddle2)
         drawBall(ball)
-        print paddle1.top
-        print ball.top
+        #print paddle1.top
+        #print ball.top
         ball = moveBall(ball, ballDirX, ballDirY)
         ballDirX, ballDirY = checkCollision(ball, paddle1, paddle2, ballDirX, ballDirY)
+        #score1, score2 = score(ball, paddle1, paddle2,ballDirX)
+        score1 = str(10)
+        score2 = str(20)
+        printScore(score1, score2,DISPLAYSURF)
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
