@@ -77,10 +77,10 @@ def score(ball, paddle1, paddle2, ballDirX):
     global score1, score2 #for inbound local reference error
     condition1 = (ball.right == paddle2.left and paddle2.top < ball.top and paddle2.bottom > ball.bottom)
     condition2 = (ball.left == paddle1.right and paddle1.top < ball.top and paddle1.bottom > ball.bottom)
-    if condition1:
+    if condition1 or ball.left == LINETHICKNESS:
         score2 += 1
         
-    if condition2:
+    if condition2 or ball.right == (WINDOWWIDTH - LINETHICKNESS):
         score1 += 1
         
     return score1, score2
