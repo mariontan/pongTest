@@ -1,0 +1,11 @@
+def score(ball, paddle1, paddle2, ballDirX):
+    global score1, score2 #for inbound local reference error
+    condition1 = self.rect.right <= SCREEN_WIDTH and self.rect.right >= SCREEN_WIDTH - 2 * PADDLE_WIDTH
+    condition2 = self.rect.left <= 2 * PADDLE_WIDTH and self.rect.left >= -1 * PADDLE_WIDTH
+    if condition1:
+        score2 += 1
+        
+    if condition2:
+        score1 += 1
+        
+    return score1, score2

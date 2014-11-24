@@ -1,7 +1,18 @@
 import pygame, sys
 from pygame.locals import *
+import sys, os, traceback
 import random
 
+#sounds
+pygame.mixer.init(buffer=0)
+sounds = {
+    "ping" : pygame.mixer.Sound("data/ping.wav"),
+    "click" : pygame.mixer.Sound("data/click.wav"),
+    "da-ding" : pygame.mixer.Sound("data/da-ding.wav")
+}
+sounds["ping"].set_volume(0.05)
+sounds["click"].set_volume(0.5)
+sounds["da-ding"].set_volume(0.5)
 
 # Number of frames per second
 # Change this value to speed up or slow down your game
@@ -25,8 +36,7 @@ YELLOW    = (255,255,0)
 #Draws the arena the game will be played in. 
 def drawArena():
     DISPLAYSURF.fill((0,0,0))
-    #Draw outline of arena
-    pygame.draw.rect(DISPLAYSURF, WHITE, ((0,0),(WINDOWWIDTH,WINDOWHEIGHT)), LINETHICKNESS*2)
+       
     #Draw centre line
     pygame.draw.line(DISPLAYSURF, WHITE, ((WINDOWWIDTH/2),0),((WINDOWWIDTH/2),WINDOWHEIGHT), (LINETHICKNESS/4))
 
@@ -48,10 +58,10 @@ def drawBall(ball):
 #Random start direction, ensures that each time the game starts
 #ball may go in either direction
 def start():
-    number = random.randint(1,10)
-    if number >= 5:
+    number = random.randint(1,5000)
+    if number >= 25:
         return 1
-    if number < 5:
+    if number < 25:
         return -1
     
 #moves the ball returns new position
@@ -63,25 +73,26 @@ def moveBall(ball, ballDirX, ballDirY):
 #Checks for a collision with a wall or paddle, and 'bounces' ball off them.
 #direction reverses
 def checkCollision(ball, paddle1, paddle2, ballDirX, ballDirY):    #125          90  paddle2.top < ball.top is with respect to the screen When ball goes up  ball.top decreses
-    condition1 = (ballDirX == 1 and ball.right == paddle2.left and paddle2.top < ball.top and paddle2.bottom > ball.bottom)
-    condition2 = (ballDirX == -1 and ball.left == paddle1.right and paddle1.top < ball.top and paddle1.bottom > ball.bottom)
+    condition1 = (ballDirX == 1 and ball.right == paddle2.left and paddle2.top < ball.top and paddle2.bottom > ball.bottom)#collide with paddle2
+    condition2 = (ballDirX == -1 and ball.left == paddle1.right and paddle1.top < ball.top and paddle1.bottom > ball.bottom)#collide with paddle1
     
-    if ball.top == (LINETHICKNESS) or ball.bottom == (WINDOWHEIGHT - LINETHICKNESS):
+    if ball.top == 0 or ball.bottom == WINDOWHEIGHT:
         ballDirY *= -1
-    if ball.left == (LINETHICKNESS) or ball.right == (WINDOWWIDTH - LINETHICKNESS) or condition1 or condition2:
+    if condition1 or condition2:
         ballDirX *= -1
+        sounds["ping"].play()
     return ballDirX, ballDirY
 
 #keeps track of the score
 def score(ball, paddle1, paddle2, ballDirX):
     global score1, score2 #for inbound local reference error
-    condition1 = (ball.right == paddle2.left and paddle2.top < ball.top and paddle2.bottom > ball.bottom)
-    condition2 = (ball.left == paddle1.right and paddle1.top < ball.top and paddle1.bottom > ball.bottom)
-    if condition1 or ball.left == LINETHICKNESS:
+
+    if ball.left == 0: #ball has exited the screen on the left
         score2 += 1
-        
-    if condition2 or ball.right == (WINDOWWIDTH - LINETHICKNESS):
+        sounds["click"].play()
+    if ball.right == WINDOWWIDTH: #ball has exited the screen on the right
         score1 += 1
+        sounds["click"].play()
         
     return score1, score2
 
@@ -98,13 +109,12 @@ def end():
     pygame.quit()
     sys.exit()
 
-
-    
 #Main function
 def main():
     pygame.init()
     global DISPLAYSURF
 
+    sounds["ping"].play()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT)) 
     pygame.display.set_caption('Pong')
@@ -160,6 +170,12 @@ def main():
         drawPaddle(paddle1)
         drawPaddle(paddle2)
         drawBall(ball)
+        
+        if ball.left <= 0 or ball.right >= WINDOWWIDTH:
+            sounds["ping"].play()
+            ballDirX = start() 
+            ballDirY = start()
+            ball = pygame.Rect(ballX, ballY, LINETHICKNESS, LINETHICKNESS)
         
         ball = moveBall(ball, ballDirX, ballDirY)
         ballDirX, ballDirY = checkCollision(ball, paddle1, paddle2, ballDirX, ballDirY)
